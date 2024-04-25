@@ -1,13 +1,10 @@
 "use client";
-// ComponenteFormulario.tsx
-
 import { useState } from "react";
 import api from "@/api";
-import { Asistencia } from "@/types";
+import { formatFecha } from "../utils/formatFecha";
 
 const Formulario = () => {
   const [dni, setDni] = useState("");
-  const [alumno, setAlumno] = useState({});
 
   const handleChangeDni = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDni(event.target.value);
@@ -17,28 +14,24 @@ const Formulario = () => {
     event.preventDefault();
 
     try {
-      // Obtener la lista de asistencias
-      const asistencias: Asistencia[] = await api.asistencias.list();
-      // Verificar si el DNI ingresado está en la lista de asistencias
-      const [alumnoEncontrado] = asistencias.filter(
-        (asistencia: Asistencia) => asistencia.dni == parseInt(dni)
-      );
+      // Obtener la fecha actual en el formato deseado
+      const formattedDate = formatFecha(new Date());
+      // Enviar los datos del formulario al servidor
+      await api.asistencias.enviarAsistencia({
+        dni: parseInt(dni),
+        fechaHoy: formattedDate,
+      });
 
-     
-      if (alumnoEncontrado) {
-        // Guardar la información del alumno
-        setAlumno(alumnoEncontrado)
-        console.log(alumno)
-      } else {
-        console.log("El alumno no está presente en la lista de asistencias.");
-      }
     } catch (error) {
-      console.error("Error al obtener la lista de asistencias:", error);
+      console.error(
+        "Error al enviar los datos del formulario al servidor:",
+        error
+      );
     }
   };
 
   return (
-    <form className="flex flex-col   mx-auto mt-10" onSubmit={handleSubmit}>
+    <form className="flex flex-col mx-auto mt-10" onSubmit={handleSubmit}>
       <label className="font-bold mb-2" htmlFor="dni">
         Ingrese su DNI:
       </label>
